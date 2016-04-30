@@ -29,9 +29,31 @@
   <div id="content-wrapper">
     <div class="inner clearfix">
       <section id="main-content">
+        <h2>Installing new Symfony project</h2>
         <h3>
-            <a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Welcome to my GitHub Pages.
+            Install the Symfony installer
         </h3>
+        <p>
+          <blockquote>
+            <pre>
+              <code>
+                $ sudo curl -LsS https://symfony.com/installer -o /usr/local/bin/symfony
+                $ sudo chmod a+x /usr/local/bin/symfony
+              </code>
+            </pre>
+          </blockquote>
+        </p>
+        <h3>Creating the Symfony new application</h3>
+        <p>
+          Your can very easy to specify the Symfony version when you installed.
+          <blockquote>
+            <pre>
+              <code>
+                $ symfony new my_project_name 2.8.1
+              </code>
+            </pre>
+          </blockquote>
+        </p>
       </section>
 
       <aside id="sidebar">
