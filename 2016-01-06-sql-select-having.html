@@ -29,9 +29,36 @@
   <div id="content-wrapper">
     <div class="inner clearfix">
       <section id="main-content">
-        <h2>Here My Post About JavaScript</h2>
+        <h2>SQL Select Having</h2>
+        <h3>
+            What the difference? between `where` and `having`
+        </h3>
+        <p>We could use `having` function to select data with condition of `count` column value</p>
         <p>
-          <a href="http://theredfoxfire.github.io/2016-01-03-array-filter-in-javascript.html">Array Filter In JavaScript</a>
+          <table>
+            <tr><td>id</td>	<td>client</td>	<td>tarif</td>	<td>date_achat</td></tr>
+            <tr><td>1</td>	<td>Pierre</td>	<td>102</td>	<td>2012-10-23</td></tr>
+            <tr><td>2</td>	<td>Simon</td>	<td>47</td>	<td>2012-10-27</td></tr>
+            <tr><td>3</td>	<td>Marie</td>	<td>18</td>	<td>2012-11-05</td><tr>
+            <tr><td>4</td>	<td>Marie</td>	<td>20</td>	<td>2012-11-14</td><tr>
+            <tr><td>5</td>	<td>Pierre</td>	<td>160</td>	<td>2012-12-03</td></tr>
+          </table>
+          <blockquote>
+            <pre>
+              <code>
+                SELECT client, SUM(tarif)
+                FROM achat
+                GROUP BY client
+                HAVING SUM(tarif) > 40
+              </code>
+            </pre>
+          </blockquote>
+          And here is the result
+          <table>
+            <tr><td>client</td>	<td>SUM(tarif)</td></tr>
+            <tr><td>Pierre</td>	<td>262</td></tr>
+            <tr><td>Simon</td>	<td>47</td></tr>
+          </table>
         </p>
       </section>
 
