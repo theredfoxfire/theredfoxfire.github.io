@@ -14,7 +14,7 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-  <title>Write, write, write give your wings on code!</title>
+  <title>Sending Email in JavaScript using Nodemailer</title>
 </head>
 
 <body>
@@ -29,67 +29,51 @@
   <div id="content-wrapper">
     <div class="inner clearfix">
       <section id="main-content">
-        <h2>Understanding when we chose `self` or `this` for access class members in PHP</h2>
+        <h2>Sending Email in JavaScript using Nodemailer</h2>
         <h3>
-            `self` and `this` Keyword inside a Class
+            Install Nodemailer via NPM
         </h3>
-        <p>We use `self` keyword to access static class members and use `$this` for non-static members</p>
+        <p>To install Nodemailer just go to your app directory and run this command</p>
         <p>
           <blockquote>
             <pre>
               <code>
-                class Car
-                {
-                  /**
-                  * $brake number;
-                  *
-                  */
-                  public static $brake;
-
-                  /**
-                  * $speed number;
-                  *
-                  */
-                  public $speed;
-
-                  public static function braking($brake) {
-                    self::brake = $brake;
-                    return $this->speed - $brake;
-                  }
-                }
+                $ cd your-app-directory
+                $ npm install --save nodemailer
               </code>
             </pre>
           </blockquote>
         </p>
-        <h3>`self` and `this` keyword on inherited object</h3>
+        <h3>Sending an Email</h3>
         <p>
-          In this example, self::who() will always output ‘parent’, while $this->who() will depend on what class the object has.<br />
-
-          Now we can see that self refers to the class in which it is called, while $this refers to the class of the current object.<br />
+          To send an email we can set the transporter first, and then set the message body. <br />
+          See the code bellow, in my example I assumed we are use Gmail SMTP as mail server.
         </p>
         <p>
           <blockquote>
             <pre>
               <code>
-                class ParentClass {
-                	function test() {
-                		self::who();	// will output 'parent'
-                		$this->who();	// will output 'child'
-                	}
+                require nodemailer from 'nodemailer';
 
-                	function who() {
-                		echo 'parent';
-                	}
+                // create a transporter
+                let mailTransporter = nodemailer.createTransport('smtps://your-user@gmail.com:your-pass-here@smtp.gmail.com');
+
+                // set-up email data
+                let mailOptions = {
+                  from: 'Foo Baz <foo@baz.com>', //sender address
+                  to: 'Recipient Name <recipient@baz.com>', //recipient address
+                  subject: 'Your mail subject here',
+                  text: 'Your mail text here',
+                  html: 'If contain <b>html</b> code, put your <b>html</b> code here',
                 }
 
-                class ChildClass extends ParentClass {
-                	function who() {
-                		echo 'child';
-                	}
-                }
-
-                $obj = new ChildClass();
-                $obj->test();
+                // sending the email
+                mailTransporter.sendMail(mailOptions, (error, info) => {
+                  if (error) {
+                    console.log(error);
+                  }
+                  console.log('Message sent! ' + info.response );
+                })
               </code>
             </pre>
           </blockquote>
