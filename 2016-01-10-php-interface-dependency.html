@@ -14,7 +14,7 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-  <title>Write, write, write give your wings on code!</title>
+  <title>Interface Dependency in PHP</title>
 </head>
 
 <body>
@@ -29,12 +29,44 @@
   <div id="content-wrapper">
     <div class="inner clearfix">
       <section id="main-content">
-        <h2>Here My Post About PHP</h2>
+        <h2>Interface Dependency in PHP</h2>
+        <h3>
+            Interface Dependency
+        </h3>
         <p>
-          <a href="http://theredfoxfire.github.io/2016-01-04-installing-new-symfony-project.html"> Installing New Symfony Project</a><br />
-          <a href="http://theredfoxfire.github.io/2016-01-09-php-interface.html"> Interface in PHP</a><br />
-          <a href="http://theredfoxfire.github.io/2016-01-10-php-interface-dependency.html"> Interface Dependency in PHP</a><br />
-          <a href="http://theredfoxfire.github.io/2016-01-05-php-keyword-self-vs-this.html"> `self` vs `$this` Keyword in PHP</a>
+          An interface can also extend another interface which allow us to define dependencies.
+        </p>
+        <p>
+          <blockquote>
+            <pre>
+              <code>
+                interface A {
+                  public function do1();
+                  public function do2();
+                }
+
+                interface B extends A { // you could extends function from another interface
+                  public function do1();
+                  public function do3();
+                }
+
+                class C implements B {
+
+                  public function do1() {
+                    // you could define your custom behavior here
+                  }
+
+                  public function do2() {
+                    // you could define your custom behavior here
+                  }
+
+                  public function do3() {
+                    // you could define your custom behavior here
+                  }
+                }
+              </code>
+            </pre>
+          </blockquote>
         </p>
       </section>
 
