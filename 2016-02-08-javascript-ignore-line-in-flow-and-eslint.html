@@ -14,7 +14,7 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-  <title>Write, write, write give your wings on code!</title>
+  <title>JavaScript Mocha Error Timeout Require Done Callback</title>
 </head>
 
 <body>
@@ -29,12 +29,38 @@
   <div id="content-wrapper">
     <div class="inner clearfix">
       <section id="main-content">
-        <h2>Here My Post About JavaScript</h2>
+        <h2>JavaScript Ignore Spesific Line in Flow and Eslint</h2>
+        <h3>
+            You got itches, with very single line error
+        </h3>
         <p>
-          <a href="http://theredfoxfire.github.io/2016-01-03-array-filter-in-javascript.html">Array Filter In JavaScript</a><br />
-          <a href="http://theredfoxfire.github.io/2016-01-07-javascript-send-email-node-js.html">Send Email In JavaScript use Nodemailer</a><br />
-          <a href="http://theredfoxfire.github.io/2016-02-08-javascript-ignore-line-in-flow-and-eslint.html">Ignore Line in Flow and Eslint</a><br />
-          <a href="http://theredfoxfire.github.io/2016-01-08-javascript-mocha-error-timeout-require-done-callback.html">JavaScript Mocha Error Timeout Require Done Callback</a>
+          That is very simple one, just add this in to your code
+        </p>
+        <p>
+          <blockquote>
+            <pre>
+              <code>
+                // $FlowFixMe
+                import { Picker } from 'native-base';
+
+                const Item = Picker.Item;
+                type Props = {};
+                type State = {
+                  selectedItem: any;
+                  selected1: string;
+                  results: {
+                    items: Array<any>;
+                  };
+                }
+                export default class BikeType extends Component {
+                  state: State; // eslint-disable-line
+                ....
+              </code>
+            </pre>
+          </blockquote>
+        </p>
+        <p>
+          Have a look <i>`// $FlowFixMe`</i> and <i>`// eslint-disable-line`</i> those magic comment will make Flow and Eslint ignore the line
         </p>
       </section>
 
