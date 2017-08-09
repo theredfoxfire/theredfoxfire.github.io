@@ -29,10 +29,25 @@
   <div id="content-wrapper">
     <div class="inner clearfix">
       <section id="main-content">
-        <h2>Here My Post About SQL</h2>
+        <h2>A config after MYSQL upgrade</h2>
+        <h3>
+            Noo, I got some issue after upgrading mysql to the latest version 5.7.17
+        </h3>
         <p>
-          <a href="http://theredfoxfire.github.io/2016-01-06-sql-select-having.html">Select Having</a>
-          <a href="http://theredfoxfire.github.io/2017-08-06-sql-a-config-after-mysql-upgrade.html">A config after MYSQL upgrade</a>
+            Well the issue is about restricted grouping, so I figuring out the problems and it's all abut that.
+            You can try to disable the only_full_group_by setting by executing the following:</p>
+        <p>
+          <blockquote>
+            <pre>
+              <code>
+                  mysql>
+                  set global sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
+                  mysql>
+                  set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
+              </code>
+            </pre>
+          </blockquote>
+          Well yeah this is pretty simple things, but it's make me frustated, when I am using native query without Framework.
         </p>
       </section>
 
