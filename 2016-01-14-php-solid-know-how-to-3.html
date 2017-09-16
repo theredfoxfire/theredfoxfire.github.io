@@ -45,7 +45,7 @@
         </p>
         <h3># 3 # Liskov substitution principle</h3>
         <p>
-          We’ve been taught that the whole world is made of objects and that we are supposed to model our software after the real world. However, as I’ll cover in this post, sometimes that is a mistake.
+          We’ve been taught that the whole world is made of objects and that we are supposed to model our software after the real world.
           <br><br>
           The Liskov Substitution Principle says that “Functions that use pointers or references to base classes must be able to use objects of derived classes without knowing it” (Uncle Bob’s paraphrase).
         </p>
@@ -53,63 +53,35 @@
         <p>
               <pre>
               <code>
-                  // Liskov Substitution Principle Violation
-                  // The Rectangle - Square problem
+                  //Liskov Substitution Principle
                   class Rectangle
                   {
-                      protected $width;
-                      protected $height;
-                      public function setHeight($height)
-                      {
-                          $this->height = $height;
-                      }
-                      public function getHeight()
-                      {
-                          return $this->height;
-                      }
-                      public function setWidth($width)
-                      {
-                          $this->width = $width;
-                      }
-                      public function getWidth()
-                      {
-                          return $this->width;
-                      }
-                      public function area()
-                      {
-                           return $this->height * $this->width;
-                      }
+                    public function setWidth($w) { $this->width = $w; }
+                    public function setHeight($h) { $this->height = $h; }
+                    public function getArea() { return $this->height * $this->width; }
                   }
 
 
                   class Square extends Rectangle
                   {
-                      public function setHeight($value)
-                      {
-                          $this->width = $value;
-                          $this->height = $value;
-                      }
-                      public function setWidth($value)
-                      {
-                          $this->width = $value;
-                          $this->height = $value;
-                      }
+                    public function setWidth($w) { $this->width = $w; $this->height = $w; }
+                    public function setHeight($h) { $this->height = $h; $this->width = $h; }
                   }
 
 
-                  class RectangleTest
-                  {
-                      private $rectangle;
-                      public function __construct(Rectangle $rectangle)
-                      {
-                          $this->rectangle = $rectangle;
-                      }
-                      public function testArea()
-                      {
-                          $this->rectangle->setHeight(2);
-                          $this->rectangle->setWidth(3);
-                          // Expect rectangle's area to be 6
-                      }
+                  //and we create our function to calculate classes :
+                  function areaOfRectangle() {
+                    $rectangle = new Rectangle();
+                    $r->setWidth(7); $r->setHeight(3);
+                    $r->getArea(); // 21
+                  }
+
+
+                  //as the LSP says, we should be able to change Rectangle by Square
+                  function areaOfRectangle() {
+                    $rectangle = new Square();
+                    $r->setWidth(7); $r->setHeight(3);
+                    $r->getArea(); // 9
                   }
               </code>
           </pre>
