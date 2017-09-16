@@ -37,11 +37,11 @@
         <p>
             SOLID stands for<br><br>
 
-            Single responsibility principle
-            Open closed principle
-            Liskov substitution principle
-            Interface segregation principle
-            Dependency inversion principle
+            Single responsibility principle<br>
+            Open closed principle<br>
+            Liskov substitution principle<br>
+            Interface segregation principle<br>
+            Dependency inversion principle<br>
         </p>
         <h3># 1 # Single responsibility principle</h3>
         <p>
@@ -76,6 +76,8 @@
                           return json_encode($this->getContents());
                       }
                   }
+                  
+
                   // Refactored
                   class Report
                   {
@@ -95,6 +97,8 @@
                           ];
                       }
                   }
+
+
                   interface ReportFormattable
                   {
                       public function format(Report $report);
