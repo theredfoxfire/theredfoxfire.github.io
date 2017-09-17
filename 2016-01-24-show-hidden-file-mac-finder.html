@@ -14,7 +14,7 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-  <title>Force https:// in Symfony 3</title>
+  <title>Show hidden files in Mac finder</title>
 </head>
 
 <body>
@@ -29,26 +29,28 @@
   <div id="content-wrapper">
     <div class="inner clearfix">
       <section id="main-content">
-        <h2>Force https:// in Symfony 3</h2>
+        <h2>Show hidden files in Mac finder</h2>
         <p>
-            Sometimes, you want to secure some routes and be sure that they are always accessed via the HTTPS protocol. The Routing component allows you to enforce the URI scheme via schemes:
+          Show/Hide Hidden Files the Long Way<br/><br/>
+
+          The long way to show hidden Mac OS X files is as follows:<br><br>
+
+            <ol>
+              <li>Open Terminal found in Finder > Applications > Utilities</li>
+              <li>In Terminal, paste the following: <br><code>defaults write com.apple.finder AppleShowAllFiles YES</code></li>
+              <li>Press return</li>
+              <li>Hold the ‘Option/alt’ key, then right click on the Finder icon in the dock and click Relaunch.</li>
+
+              <li>Relaunch Finder by right clicking the Finder Icon whilst holding the `option/alt` key</li>
+            </ol>
+            <br/><br/>
+          This will show all hidden files. To hide them again, follow the same steps but replace the Terminal command with:
+          <br/></br>
+            <code>defaults write com.apple.finder AppleShowAllFiles NO</code>
+          <br><br>
+
+          It’s not the longest set of instructions or the biggest command to commit to memory but if you’re doing this a lot, it’s worth spending a few minutes now to save yourself a lot more time in the future.
         </p>
-  <p>
-    <pre>
-        <code>
-            // app/config/routing.php
-            use Symfony\Component\Routing\RouteCollection;
-            use Symfony\Component\Routing\Route;
-
-            $collection = new RouteCollection();
-            $collection->add('secure', new Route('/secure', array(
-                '_controller' => 'AppBundle:Main:secure',
-            ), array(), array(), '', array('https')));
-
-            return $collection;
-        </code>
-    </pre>
-  </p>
       </section>
 
       <aside id="sidebar">
