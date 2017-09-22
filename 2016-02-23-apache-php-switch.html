@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+  <script src="javascripts/main.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+  <title>Apache <=> PHP switching version</title>
+</head>
+
+<body>
+  <header>
+    <div class="inner">
+      <h1><a href="http://theredfoxfire.github.io/">Hasan Setiawan</a></h1>
+      <h2>Write, write, write give your wings on code!</h2>
+      <a href="https://github.com/theredfoxfire" class="button"><small>Follow me on</small> GitHub</a>
+    </div>
+  </header>
+
+  <div id="content-wrapper">
+    <div class="inner clearfix">
+      <section id="main-content">
+        <h2>Apache <=> PHP switching version</h2>
+        <p>
+          You have successfully installed your PHP versions, but we need to tell Apache to use them.
+          You will again need to edit the <code>/usr/local/etc/apache2/2.4/httpd.conf</code> file and search for
+          <code>#LoadModule php5_module</code>.
+        </p>
+        <p>
+          You will notice that each PHP version added a <code>LoadModule</code> entry, however these are all
+          pointing to very specific versions. We can replace these with some more generic paths
+          (exact versions may differ):
+        </p>
+        <p><pre><code>
+LoadModule php5_module        /usr/local/Cellar/php55/5.5.38_11/libexec/apache2/libphp5.so
+LoadModule php5_module        /usr/local/Cellar/php56/5.6.26_3/libexec/apache2/libphp5.so
+LoadModule php7_module        /usr/local/Cellar/php70/7.0.11_5/libexec/apache2/libphp7.so
+LoadModule php7_module        /usr/local/Cellar/php71/7.1.0-rc.3_8/libexec/apache2/libphp7.so
+        </code></pre>
+        </p>
+        <p>
+          Modify the paths as follows:
+        </p>
+        <p>
+          <pre>
+            <code>
+#LoadModule php5_module    /usr/local/opt/php55/libexec/apache2/libphp5.so
+LoadModule php5_module    /usr/local/opt/php56/libexec/apache2/libphp5.so
+#LoadModule php7_module    /usr/local/opt/php70/libexec/apache2/libphp7.so
+#LoadModule php7_module    /usr/local/opt/php71/libexec/apache2/libphp7.so
+            </code>
+          </pre>
+        </p>
+        <p>
+          This will tell Apache to use PHP 5.6 to handle PHP requests. (We will add the ability to switch PHP versions later).<br><br>
+
+          Also you must set the Directory Indexes for PHP explicitly, so search for this block:
+        </p>
+        <p>
+          <pre>
+            <code>
+<script>
+var str = `<IfModule dir_module>
+    DirectoryIndex index.html
+</IfModule>`;
+document.write(htmlEntities(str));
+</script>
+            </code>
+          </pre>
+        </p>
+        <p>
+          and replace it with this:
+        </p>
+        <p>
+          <pre>
+            <code>
+<script>
+var str = `<IfModule dir_module>
+    DirectoryIndex index.php index.html
+</IfModule>
+
+<FilesMatch \.php$>
+    SetHandler application/x-httpd-php
+</FilesMatch>`;
+document.write(htmlEntities(str));
+</script>
+            </code>
+          </pre>
+        </p>
+        <p>
+          Save the file and restart Apache again, now that we have installed PHP:
+        </p>
+        <p><code>sudo apachectl -k restart</code></p>
+        <p>
+          Checking PHP version use of <code>phpinfo()</code>.
+          This is not something you want to leave on a production machine, but it's invaluable in a
+          development environment.<br><br>
+
+          Simply create a file called <code>info.php</code> in your <code>Sites/</code> folder you created earlier.
+          In that file, just enter the line:
+        </p>
+        <p>
+          <code> phpinfo();</code>
+        </p>
+        <p>
+          PHP Switcher Script
+        </p>
+        <p>
+          We hard-coded Apache to use PHP 5.6, but we really want to be able to switch between versions.
+          Luckily, some industrious individuals have already done the hard work for us and written a very
+          handy little PHP switcher script.
+        </p>
+        <p>
+          We will install the <code>sphp</code> script into brew's standard <code>/usr/local/bin</code>:
+        </p>
+        <p>
+          <pre>
+            <code>
+$ curl -L https://gist.github.com/w00fz/142b6b19750ea6979137b963df959d11/raw > /usr/local/bin/sphp
+$ chmod +x /usr/local/bin/sphp
+            </code>
+          </pre>
+        </p>
+        <p>Check Your Path</p>
+        <p>
+          Homebrew should have added its preferred <code>/usr/local/bin</code> and <code>/usr/local/sbin</code> to your path as part of
+          its installation process. Quickly test this by typing:
+        </p>
+        <p>
+          <pre>
+            <code>
+$ echo $PATH
+/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+            </code>
+          </pre>
+        </p>
+        <p>
+          If you don't see this, you might need to add these manually to your path. Depending on your shell your using,
+          you may need to add this line to <code>~/.profile</code>, <code>~/.bash_profile</code>, or <code>~/.zshrc</code>. We will assume you are using the
+          default bash shell, so add this line to a your <code>.profile</code> (create it if it doesn't exist) file at the
+          root of your user directory:
+        </p>
+        <p>
+          <code>
+            export PATH=/usr/local/bin:/usr/local/sbin:$PATH
+          </code>
+        </p>
+        <p>
+          At this point, I strongly recommend closing ALL your terminal tabs and windows. This will mean opening a new terminal to continue with the next step.
+          This is strongly recommended because some really strange path issues can arise with existing terminals.
+        </p>
+      </section>
+
+      <aside id="sidebar">
+
+
+        <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        <h3>
+
+        </h3>
+      </aside>
+    </div>
+  </div>
+
+
+</body>
+</html>
