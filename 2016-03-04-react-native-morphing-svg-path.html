@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+  <script src="javascripts/main.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+  <title>React Native Morphing SVG Paths with React Art</title>
+</head>
+
+<body>
+  <header>
+    <div class="inner">
+      <h1><a href="http://theredfoxfire.github.io/">Hasan Setiawan</a></h1>
+      <h2>Write, write, write give your wings on code!</h2>
+      <a href="https://github.com/theredfoxfire" class="button"><small>Follow me on</small> GitHub</a>
+    </div>
+  </header>
+
+  <div id="content-wrapper">
+    <div class="inner clearfix">
+      <section id="main-content">
+        <h2>React Native Morphing SVG Paths with React Art</h2>
+        <p>
+          We’re going to take a path. In our case all of the Batman logos,
+          and transform each SVG path into the next until we’re all out.
+          Then we’re going to transform it into a square.
+        </p>
+        <p>
+          <pre>
+            <code>
+var React = require('react-native');
+var ReactART = require('ReactNativeART');
+var Dimensions = require('Dimensions');
+var {
+  width,
+  height
+} = Dimensions.get('window');
+var {
+  AppRegistry,
+  StyleSheet,
+  Text,
+  View,
+} = React;
+var {
+  Surface,
+  Shape
+} = ReactART;
+var Morph = require('art/morph/path');
+            </code>
+          </pre>
+        </p>
+        <p>
+          We bring in the usuals, but also require <code>art/morph/path</code> which will do our magic morphing.
+        </p>
+        <p>
+          <pre>
+            <code>
+var BatmanLogoSVGs = [
+  'M 256,213 C 245,181 206,187 234,262 147,181 169,71.2 233,18   220,56   235,81   283,88   285,78.7 286,69.3 288,60   289,61.3 290,62.7 291,64   291,64   297,63   300,63   303,63   309,64   309,64   310,62.7 311,61.3 312,60   314,69.3 315,78.7 317,88   365,82   380,56   367,18   431,71   453,181 366,262 394,187 356,181 344,213 328,185 309,184 300,284 291,184 272,185 256,213 Z',
+  'M 212,220 C 197,171 156,153 123,221 109,157 120,109  159,63.6 190,114  234,115  254,89.8 260,82.3 268,69.6 270,60.3 273,66.5 275,71.6 280,75.6 286,79.5 294,79.8 300,79.8 306,79.8 314,79.5 320,75.6 325,71.6 327,66.5 330,60.3 332,69.6 340,82.3 346,89.8 366,115  410,114  441,63.6 480,109  491,157 477,221 444,153 403,171 388,220 366,188 316,200 300,248 284,200 234,188 212,220 Z',
+  'M 213,222 C 219,150 165,139 130,183 125,123 171,73.8 247,51.6 205,78   236,108  280,102  281,90.3 282,79   286,68.2 287,72   288,75.8 289,79.7 293,79.7 296,79.7 300,79.7 304,79.7 307,79.7 311,79.7 312,75.8 313,72   314,68.2 318,79   319,90.3 320,102  364,108  395,78   353,51.6 429,73.8 475,123 470,183 435,139 381,150 387,222 364,176 315,172 300,248 285,172 236,176 213,222 Z',
+    // There are many more, truncated for blog reading purposes
+];
+var BatmanLogoPaths = BatmanLogoSVGs.map((svg) => Morph.Path(svg));
+var square = Morph.Path()
+  .move(100,0)
+  .line(100,0)
+  .line(0,100)
+  .line(-100,0)
+  .close();
+BatmanLogoPaths.push(square);
+            </code>
+          </pre>
+        </p>
+        <p>
+          Then we throw a square on the end.
+        </p>
+        <p>
+          Render
+        </p>
+        <p>
+          There is nothing special here. We just add a <code>Surface</code> the full width/height of the phone
+          and instead of a string SVG path we give it the transition which just happens to be a <code>MorphPath</code>,
+          which extends from <code>Path</code> which React Art knows what to do with.
+        </p>
+        <p>
+          <pre>
+            <code>
+render: function() {
+    return (
+    <script>
+var str = `<View style={styles.container}>
+      <Surface width={width} height={height}>
+        <Shape x={-100} y={100} d={this.state.transition} fill="#000" />
+      </Surface>
+    </View>`;
+document.write(htmlEntities(str));
+    </script>
+    );
+  }
+            </code>
+          </pre>
+        </p>
+        <p>
+          The person that created the SVGs made the central point the start of the SVG so we just set it
+          back -100 to center it-ish. I don’t know. We fill it with black. Batman likes black.
+        </p>
+        <p>
+          Intial <br><br>
+          <pre>
+            <code>
+getInitialState: function() {
+  return {
+    transition: Morph.Tween(BatmanLogoPaths[0], BatmanLogoPaths[1])
+  };
+},
+componentWillMount: function() {
+  this._current = 1;
+},
+componentDidMount: function() {
+  this.animate(null, this.nextAnimation)
+},
+            </code>
+          </pre>
+        </p>
+        <p>
+          We start the intial render with a <code>Morph.Tween</code> of the first and second Batman logos.
+          We do a little setup in <code>componentWillMount</code> to say we’re currently animating to the second logo
+          (it’s a 1 since we have 0 based array indexes).
+        </p>
+        <p>
+          Then once the component is mounted we kick off the animation with our <code>this.animate</code> call.
+        </p>
+        <p>
+          Animate<br><br>
+          <pre>
+            <code>
+animate: function(start, cb) {
+    requestAnimationFrame((timestamp) => {
+      if (!start) start = timestamp;
+      var delta = (timestamp - start) / 1000;
+      if (delta > 1) return cb();
+      this.state.transition.tween(delta);
+      this.setState(this.state);
+      this.animate(start, cb);
+    })
+  },
+            </code>
+          </pre>
+        </p>
+        <p>
+          Our animate call takes a start, and a callback for when the animation is complete.
+          Thanks to React Native with get a polyfilled <code>requestAnimationFrame</code>.
+          If we don’t have a start, then we set it to the timestamp that <code>requestAnimationFrame</code> provides us.
+          The start allows us to compute how far along in the animation we are.
+        </p>
+        <p>
+          The <code>delta</code> is the current <code>timestamp</code> which is some amount of time in the future, minus the <code>start</code>.
+          The <code>/1000</code> is the amount of time each animation will take. So each morph will take <code>1000ms</code> to complete.
+        </p>
+        <p>
+          If our change is greater than 1 then we know our animation is complete and trigger are callback,
+          and also return so we don’t keep animating a complete animation.
+        </p>
+        <p>
+          We tween our transition with the new <code>delta</code> progress, we trigger a <code>setState</code> to
+          cause our UI to re-render, then we call ourself (aka <code>this.animate</code>),
+          with our start and our <code>callback</code> so we can trigger the next animation frame.
+        </p>
+        <p>Animate it Again</p>
+        <p>
+          <pre>
+            <code>
+nextAnimation: function() {
+    this._current += 1;
+    if (this._current >= BatmanLogoPaths.length) return;
+    this.setState({
+      transition: Morph.Tween(BatmanLogoPaths[this._current - 1], BatmanLogoPaths[this._current])
+    }, () => this.animate(null, this.nextAnimation))
+  },
+            </code>
+          </pre>
+        </p>
+        <p>
+          Okay so we need a little logic around keeping track of which logo is transitioning to
+          which other shape. If this function is called it means an animation has completed and we
+          need to trigger the next one.
+        </p>
+        <p>
+          We add one to the current to setup that we’re about to animate to the next logo path.
+        </p>
+        <p>
+          First we check if it’s equal to or somehow greater than the amount of logos we have.
+          If it is we stop animating and just leave the current render as the last shape in the array.
+        </p>
+        <p>
+          If not we trigger a setState to adjust the <code>this.state.transition</code> (which we pass into the <code>Shape</code>).
+          This just gets set to the <code>this._current - 1</code> logo and then the <code>this._current</code> which is going to be the next logo.
+          Because currently on screen is <code>this._current - 1</code> and we do a <code>setState</code>,
+          nothing will flash/jump since you’re rendering the same exact shape again.
+        </p>
+        <p>
+          <code>setState</code> also takes a success callback, meaning the UI has updated, we then kick off the animation. TahDah. Batman Animating.
+        </p>
+      </section>
+
+      <aside id="sidebar">
+
+
+        <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        <h3>
+
+        </h3>
+      </aside>
+    </div>
+  </div>
+
+
+</body>
+</html>
