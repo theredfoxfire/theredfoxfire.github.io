@@ -14,7 +14,7 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-  <title>Javascript async await with your bare hand</title>
+  <title>PHP Symfony Http Foundation</title>
 </head>
 
 <body>
@@ -29,39 +29,156 @@
   <div id="content-wrapper">
     <div class="inner clearfix">
       <section id="main-content">
-        <h2>Javascript async await with your bare hand</h2>
-        <p>Just show you how does async await work in very simple code</p>
+        <h2>PHP Symfony Http Foundation</h2>
+        <p>
+          <code>
+            $response = $httpKernel->handle($request);
+          </code>
+        </p>
+        <p>
+          Symfony provides many standalone libraries (also known as "Components") that help us build applications.
+        </p>
+        <p>In this guide we'll see the main ones that allow us to build an application:</p>
+        <p>
+          <pre>
+          </code>
+HTTP Kernel and HTTP Foundation
+Event Dispatcher
+Routing and YAML
+Dependency Injection
+Console
+            </code>
+          </pre>
+        </p>
+        <p>
+          We'll also see how HttpKernel enables reusable code with Bundles, and the different ways to organize our application tree directory.
+        </p>
+        <p>
+          Finally we'll finish by putting all this knowledge in practice by creating a "fortune" project with:
+        </p>
+        <p>
+          an endpoint that allows us to submit new fortunes
+          a page that lists all fortunes
+          a command that prints the last fortune
+          HTTP kernel
+          Symfony provides a HttpKernel component which follows the HTTP protocol: it converts a Request into a Response.
+        </p>
+        <p>
+          It all revolves around the following interface:
+        </p>
         <p>
           <pre>
             <code>
-async function howAsyncWork() {
-	await firstMethod();
-	await secondMethod();
-	await thirdMethod();
+namespace Symfony\Component\HttpKernel;
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+interface HttpKernelInterface
+{
+    const MASTER_REQUEST = 1;
+    const SUB_REQUEST = 2;
+
+    /**
+     * @param Request $request
+     * @param int     $type
+     * @param bool    $catch   Whether to catch exceptions or not
+     *
+     * @return Response
+     */
+    public function handle(Request $request, $type = self::MASTER_REQUEST, $catch = true);
 }
+HttpFoundation
+HttpKernel relies on the HttpFoundation component which mainly provides:
 
-function firstMethod() {
-	console.log("shoud be called at the first time");
-}
-
-function secondMethod() {
-	console.log("shoud be called at the second time");
-}
-
-function thirdMethod() {
-	console.log("shoud be called at the third time");
-}
-
-howAsyncWork();
-
-// will print log
-VM569:8 shoud called first time
-VM569:12 shoud called second time
-VM569:16 shoud called third time
-Promise {[[PromiseStatus]]: "resolved", [[PromiseValue]]: undefined}
-          </code>
-        </ore>
+Request: wraps $_GET, $_POST, $_COOKIE, $_FILES and $_SERVER
+Response: wraps header() and setcookie(), but also displays the content
+Note: Global variables have the drawback to be possibly accessed by many functions, causing their state to be unpredictable (hence bugs happen and they are hard to find/understand).
+            </code>
+          </pre>
         </p>
+        <p>
+          With HttpFoundation, PHP super globals shouldn't be accessed directly, but rather via the objects that wraps them (e.g. Request) which are passed around (those objects are not global).
+        </p>
+        <p>
+          Here's a typical usage:
+        </p>
+        <p>
+          <pre>
+            <code>
+$request = Request::createFromGlobals();
+$response = $httpKernel->handle($request);
+$reponse->send();
+In the above example, Request will be initialized using PHP super globals. Sometimes it can be useful to build it with our own provided values (e.g. for tests):
+
+$uri = '/v1/items';
+$method = 'POST';
+$parameters = array(); // GET or POST parameters, usually left unused (use uri and content instead)
+$cookies = array();
+$files = array();
+$headers = array('CONTENT_TYPE' => 'application/json');
+$content = json_encode(array('name' => 'Arthur Dent'));
+
+$request = Request::create($uri, $method, $getOrPostParameters, $cookies, $files, $headers, $content);
+In our application, we'll mainly extract its parameters:
+
+$getParameter = $request->query->get('description'); // e.g. from URI `/?description=hitchhicker`
+$postParameter = $request->request->get('name'); // e.g. from content `name=Arthur`
+$header = $request->headers->get('Content-Type'); // e.g. from headers `Content-Type: application/x-www-form-urlencoded`
+
+$customParameter = $request->attributes->get('_route'); // We'll see more about it in the next article
+Note: Those public properties are instances of Symfony\Component\HttpFoundation\ParameterBag, except headers which is an instance of Symfony\Component\HttpFoundation\HeaderBag.
+
+In our application we'll mainly build Response:
+
+$content = json_encode(array('name' => 'Arthur Dent'));
+$status = 201;
+$headers = array('Content-Type' => 'application/json');
+
+$response = new Reponse($content, $status, $headers);
+      </code>
+    </pre>
+  </p>
+  <p>
+        HttpFoundation also wraps $_SESSION in a convenient Session object. This one is however out of the scope of this series, to find more about it have a look at Symfony Session Introduction.
+</p>
+<p>
+        Example
+        Let's create a small Hello World example:
+</p>
+      <p>
+        <pre>
+          <code>
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class HelloWorldHttpKernel implements HttpKernelInterface
+{
+    public function handle(Request $request, $type = self::MASTER_REQUEST, $catch = true)
+    {
+        $name = $request->query->get('name', 'World');
+
+        return new Response("Hello $name!", 200);
+    }
+}
+
+$httpKernel = new HelloWorldHttpKernel();
+
+$request = Request::createFromGlobals();
+$response = $httpKernel->handle($request);
+$response->send();
+So we can get the following:
+
+for / URL, we get Hello World!
+for /?name=Arthur URL, we get Hello Arthur!
+          </code>
+        </pre>
+      </p>
+      <p>
+        Conclusion
+        Symfony provides a simple yet powerful component allowing us to follow the HTTP protocol.
+      </p>
       </section>
 
       <aside id="sidebar">
