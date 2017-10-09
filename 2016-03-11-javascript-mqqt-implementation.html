@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+  <script src="javascripts/main.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+  <title>Javascript MQTT implementation</title>
+</head>
+
+<body>
+  <header>
+    <div class="inner">
+      <h1><a href="http://theredfoxfire.github.io/">Hasan Setiawan</a></h1>
+      <h2>Write, write, write give your wings on code!</h2>
+      <a href="https://github.com/theredfoxfire" class="button"><small>Follow me on</small> GitHub</a>
+    </div>
+  </header>
+
+  <div id="content-wrapper">
+    <div class="inner clearfix">
+      <section id="main-content">
+        <h2>Javascript MQTT implementation</h2>
+        <p>
+          MQTT stands for MQ Telemetry Transport. It is a publish/subscribe,
+          extremely simple and lightweight messaging protocol, designed for constrained devices
+          and low-bandwidth, high-latency or unreliable networks.
+        </p>
+        <p>
+          First of all we want set up a connection to the MQTT Broker.
+          This is done by creating a Messaging.Client Object and calling the connect method with
+          a set of options.
+        </p>
+        <p>
+          <pre>
+            <code>
+//Create a new Client object with your broker's hostname, port and your own clientId
+var client = new Messaging.Client(hostname, port, clientid);
+
+var options = {
+
+     //connection attempt timeout in seconds
+     timeout: 3,
+
+     //Gets Called if the connection has successfully been established
+     onSuccess: function () {
+         alert("Connected");
+     },
+
+     //Gets Called if the connection could not be established
+     onFailure: function (message) {
+         alert("Connection failed: " + message.errorMessage);
+     }
+
+ };
+
+//Attempt to connect
+client.connect(options);
+            </code>
+          </pre>
+        </p>
+        <p>
+          Subscribing to one or more topics is done by a simple call to the `subscribe` method of the `client`
+        </p>
+        <p>
+          <pre>
+            <code>
+client.subscribe("testtopic", {qos: 2});
+
+//Publishing to a specific topic requires you to create a `Messaging.Message`
+//object and pass it to the publish method of the client
+
+var message = new Messaging.Message(payload);
+message.destinationName = topic;
+message.qos = qos;
+client.send(message);
+            </code>
+          </pre>
+        </p>
+        <p>Full implementation code</p>
+        <p>
+          <pre>
+            <code>
+// js code
+//Using the HiveMQ public Broker, with a random client Id
+var client = new Messaging.Client("broker.mqttdashboard.com", 8000, "myclientid_" + parseInt(Math.random() * 100, 10));
+
+//Gets  called if the websocket/mqtt connection gets disconnected for any reason
+client.onConnectionLost = function (responseObject) {
+    //Depending on your scenario you could implement a reconnect logic here
+    alert("connection lost: " + responseObject.errorMessage);
+};
+
+//Gets called whenever you receive a message for your subscriptions
+client.onMessageArrived = function (message) {
+    //Do something with the push message you received
+    $('#messages').append('<span>Topic: ' + message.destinationName + '  | ' + message.payloadString + '</span><br/>');
+};
+
+//Connect Options
+var options = {
+    timeout: 3,
+    //Gets Called if the connection has sucessfully been established
+    onSuccess: function () {
+        alert("Connected");
+    },
+    //Gets Called if the connection could not be established
+    onFailure: function (message) {
+        alert("Connection failed: " + message.errorMessage);
+    }
+};
+
+//Creates a new Messaging.Message Object and sends it to the HiveMQ MQTT Broker
+var publish = function (payload, topic, qos) {
+     //Send your message (also possible to serialize it as JSON or protobuf or just use a string, no limitations)
+     var message = new Messaging.Message(payload);
+     message.destinationName = topic;
+     message.qos = qos;
+     client.send(message);
+ }
+            </code>
+          </pre>
+        </p>
+        <p>
+          <pre>
+            <code>
+// html code
+<script>
+  var str = `<button onclick="client.connect(options);">1. Connect</button>
+<button onclick="client.subscribe('testtopic/#', {qos: 2}); alert('Subscribed');">2. Subscribe</button>
+<button onclick="publish('Hello Foo !','testtopic/bar',2);">3. Publish</button>
+<button onclick="client.disco`;
+  document.write(htmlEntities(str));
+</script>
+            </code>
+          </pre>
+        </p>
+      </section>
+
+      <aside id="sidebar">
+
+
+        <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        <h3>
+
+        </h3>
+      </aside>
+    </div>
+  </div>
+
+
+</body>
+</html>
