@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+  <script src="javascripts/main.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+  <title>Javascript Service Wroker</title>
+</head>
+
+<body>
+  <header>
+    <div class="inner">
+      <h1><a href="http://theredfoxfire.github.io/">Hasan Setiawan</a></h1>
+      <h2>Write, write, write give your wings on code!</h2>
+      <a href="https://github.com/theredfoxfire" class="button"><small>Follow me on</small> GitHub</a>
+    </div>
+  </header>
+
+  <div id="content-wrapper">
+    <div class="inner clearfix">
+      <section id="main-content">
+        <h2>Javascript Service Wroker</h2>
+        <p>
+          Service workers are being developed to answer frequent questions and concerns about the
+          web platform, including:
+        </p>
+        <p>
+          An inability to explain (in the Extensible Web Manifesto sense) HTTP
+          caching and high-level HTTP interactions like the HTML5 AppCache
+          Difficulty in building offline-first web applications in a natural way
+          The lack of a background execution context which many proposed capabilities could make use of
+          We also note that the long lineage of declarative-only solutions (Google Gears, Dojo Offline,
+          and HTML5 AppCache) have failed to deliver on their promise.
+          Each successive declarative-only approach failed in many of the same ways,
+          so the service worker effort has taken a different design approach: a
+          largely-imperative system that puts developers firmly in control.
+        </p>
+        <p>
+          The service worker is like a shared worker in that it:
+        </P>
+        <p>
+          Runs in its own global script context (usually in its own thread)
+          Isn’t tied to a particular page
+          Has no DOM access
+          Unlike a shared worker, it:
+        </p>
+        <p>
+          Can run without any page at all
+          Can terminate when it isn’t in use, and run again when needed (i.e., it’s event-driven)
+          Has a defined upgrade model
+          Is HTTPS only (more on that in a bit)
+          We can use service workers:
+        </p>
+        <p>
+          To make sites work faster and/or offline using network intercepting
+          As a basis for other ‘background’ features such as push messaging and background synchronization
+          Getting started
+        </p>
+        <p>
+          First you need to register for a service worker:
+        </p>
+        <p>
+          <pre>
+            <code>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/my-app/sw.js').then(function(reg) {
+    console.log('Yey!', reg);
+  }).catch(function(err) {
+    console.log('Boo!', err);
+  });
+}
+In this example, <code>/my-app/sw.js</code> is the location of the service worker script,
+and it controls pages whose URL begins with <code>/my-app/</code>.
+
+<code>.register</code> returns a promise. If you’re new to promises, check out the HTML5Rocks article.
+            </code>
+          </pre>
+        </p>
+        <p>
+          Some restrictions:
+        </p>
+        <p>
+          The registering page must have been served securely (HTTPS without cert errors)
+          The service worker script must be on the same origin as the page, although you can import scripts from other origins using importScripts
+          …as must the scope
+          HTTPS only you say?
+        </p>
+        <p>
+          Using service workers you can hijack connections, respond differently, & filter responses.
+          Powerful stuff. While you would use these powers for good, a man-in-the-middle might not.
+          To avoid this, you can only register for service workers on pages served over HTTPS, so we
+          know the service worker the browser receives hasn’t been tampered with during its journey
+          through the network.
+        </p>
+        <p>
+          GitHub Pages are served over HTTPS, so they’re a great place to host demos.
+        </p>
+        <p>
+          Initial lifecycle
+        </p>
+        <p>
+          Your worker script goes through three stages when you call <code>.register</code>:
+        </p>
+        <p>
+          <pre>
+            <code>
+You can use events to interact with install and activate:
+
+self.addEventListener('install', function(event) {
+  event.waitUntil(
+    fetchStuffAndInitDatabases()
+  );
+});
+
+self.addEventListener('activate', function(event) {
+  // You're good to go!
+});
+              </code>
+            </pre>
+          </p>
+<p>
+You can pass a promise to event.waitUntil to extend the installation process. Once activate fires,
+your service worker can control pages!
+</p>
+<p>
+So I’m controlling pages now?
+</p>
+<p>
+Well, not quite. A document will pick a service worker to be its controller when it navigates, so the document you called <code>.register</code> from isn’t being controlled, because there wasn’t a service worker there when it first loaded.
+</p>
+<p>
+If you refresh the document, it’ll be under the service worker’s control. You can check <code>navigator.serviceWorker.controller</code> to see which service worker is in control, or null if there isn’t one. Note: when you’re updating from one service worker to another, things work a little differently. We’ll get into that in the “Updating” section.
+</p>
+<p>
+If you shift+reload a document, it’ll always load without a controller, which is handy for testing quick CSS & JS changes.
+</p>
+<p>
+Documents tend to live their whole life with a particular service worker, or none at all. However, a service worker can call <code>self.skipWaiting()</code> (spec) to do an immediate takeover of all pages within scope.
+</p>
+<p>
+Network intercepting
+</p>
+<p>
+  <pre>
+    <code>
+self.addEventListener('fetch', function(event) {
+  console.log(event.request);
+});
+    </code>
+  </pre>
+</p>
+<p>
+You get fetch events for:
+</p>
+<p>
+Navigations within your service worker’s scope
+Any requests triggered by those pages, even if they’re to another origin
+This means you get to hear about requests for the page itself, the CSS, JS, images, XHR, beacons… all of it. The exceptions are:
+</p>
+<p>
+<p>
+<code>iframes</code> & <code><script>var str = `<object>`; document.write(htmlEntities(str));</script></code>s – these will pick their own controller based on their resource URL
+Service workers – requests to <code>fetch/update</code> a service worker don’t go through the service worker
+Requests triggered within a service worker – you’d get a loop otherwise
+The request object gives you information about the request such as its URL, method & headers. But the really fun bit, is you can hijack it and respond differently:
+</p>
+<p>
+<pre>
+  <code>
+self.addEventListener('fetch', function(event) {
+  event.respondWith(new Response("Hello world!"));
+});
+</code>
+</pre>
+</p>
+<p>
+<code>.respondWith</code> takes a Response object or a promise that resolves to one. We’re creating a manual response above. The Response object comes from the Fetch Spec. Also in the spec is the fetch() method, which returns a promise for a response, meaning you can get your response from elsewhere:
+</p>
+<p>
+  <pre>
+    <code>
+self.addEventListener('fetch', function(event) {
+  if (/\.jpg$/.test(event.request.url)) {
+    event.respondWith(
+      fetch('//www.google.co.uk/logos/…3-hp.gif', {
+        mode: 'no-cors'
+      })
+    );
+  }
+});
+  </code>
+</pre>
+</p>
+<p>
+In the above, I’m capturing requests that end in .jpg and instead responding with a Google doodle. fetch() requests are CORS by default, but by setting no-cors I can use the response even if it doesn’t have CORS access headers (although I can’t access the content with JavaScript). Here’s a demo of that.
+</p>
+<p>
+Promises let you fall back from one method to another:
+</p>
+<p>
+  <pre>
+    <code>
+self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    fetch(event.request).catch(function() {
+      return new Response("Request failed!");
+    })
+  );
+});
+</code>
+</pre>
+</p>
+<p>
+The service worker comes with a cache API, making it easy to store responses for reuse later. More on that shortly, but first…
+</p>
+<p>
+Updating a service worker
+</p>
+<p>
+The lifecycle of a service worker is based on Chrome’s update model: do as much as possible in the background, don’t disrupt the user, complete the update when the current version closes.
+</p>
+<p>
+Whenever you navigate to a page within scope of your service worker, the browser checks for updates in the background. If the script is byte-different, it’s considered to be a new version,
+and installed (note: only the script is checked, not external importScripts).
+However, the old version remains in control over pages until all
+tabs using it are gone (unless <code>.replace()</code>
+is called during install). Then the old version is garbage collected and the new version takes over.
+</p>
+<p>
+This avoids the problem of two versions of a site running at the same time, in different tabs. Our current strategy for this is “cross fingers, hope it doesn’t happen”.
+</p>
+<p>
+Note: Updates obey the freshness headers of the worker script (such as max-age), unless the max-age is greater than 24 hours, in which case it is capped to 24 hours.
+</p>
+<p>
+  <pre>
+    <code>
+self.addEventListener('install', function(event) {
+  // this happens while the old version is still in control
+  event.waitUntil(
+    fetchStuffAndInitDatabases()
+  );
+});
+
+self.addEventListener('activate', function(event) {
+  // the old version is gone now, do what you couldn't
+  // do while it was still around
+  event.waitUntil(
+    schemaMigrationAndCleanup()
+  )
+});
+</code>
+</pre>
+</p>
+<p>
+Here’s how that looks in practice.
+</p>
+<p>
+Unfortunately refreshing a single tab isn’t enough to allow an old worker to be collected and a new one take over. Browsers make the next page request before unloading the current page, so there isn’t a moment when current active worker can be released.
+</p>
+<p>
+The easiest way at the moment is to close & reopen the tab (cmd+w, then cmd+shift+t on Mac), or shift+reload then normal reload.
+</p>
+<p>
+The cache
+</p>
+<p>
+Service worker comes with a caching API, letting you create stores of responses keyed by request.
+</p>
+
+<p>
+<pre>
+  <code>
+self.addEventListener('install', function(event) {
+  // pre cache a load of stuff:
+  event.waitUntil(
+    caches.open('myapp-static-v1').then(function(cache) {
+      return cache.addAll([
+        '/',
+        '/styles/all.css',
+        '/styles/imgs/bg.png',
+        '/scripts/all.js'
+      ]);
+    })
+  )
+});
+
+self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    caches.match(event.request).then(function(cachedResponse) {
+      return cachedResponse || fetch(event.request);
+    })
+  );
+});
+</code>
+</pre>
+</p>
+<p>
+Matching within the cache is similar to the browser cache. Method, URL and vary headers are taken into account, but freshness headers are ignored. Things are only removed from caches when you remove them.
+</p>
+<p>
+You can add individual items to the cache with <code>cache.put(request, response)</code>,
+including ones you’ve created yourself. You can also control matching, discounting things
+such as query string, methods, and vary headers.
+</p>
+
+      </section>
+
+      <aside id="sidebar">
+
+
+        <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        <h3>
+
+        </h3>
+      </aside>
+    </div>
+  </div>
+
+
+</body>
+</html>
