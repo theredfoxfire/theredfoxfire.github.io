@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+  <script src="javascripts/main.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+  <title>Javascript Pipe With your Barehand</title>
+</head>
+
+<body>
+  <header>
+    <div class="inner">
+      <h1><a href="http://theredfoxfire.github.io/">Hasan Setiawan</a></h1>
+      <h2>Write, write, write give your wings on code!</h2>
+      <a href="https://github.com/theredfoxfire" class="button"><small>Follow me on</small> GitHub</a>
+    </div>
+  </header>
+
+  <div id="content-wrapper">
+    <div class="inner clearfix">
+      <section id="main-content">
+        <h2>Javascript Pipe With your Barehand</h2>
+        <p>What is a pipe function?</p>
+        <p>
+          A pipe is a form of redirection that is used to send the output of one program to another program for further processing.
+          pipeline consists of a chain of processing elements, arranged so that the output of each element is the input of the next.
+        </p>
+        <p>
+          Implementing a Pipe Function
+        </p>
+        <p>
+          So we know that a pipe function takes an n sequence of operations and returns a function.
+          Before tackling the whole problem, let’s first solve a small sub problem.
+          By finding a solution to a sub problem, we can then generalize the solution to solve the main
+          problem. So, our sub problem is to implement a pipe function that takes any 2 operations and returns a function.
+          Let’s say my friend and I bought a large pizza and I want to know how much the pizza costed each of us, after tax.
+        </p>
+        <p>
+          Let’s say my friend and I bought a large pizza and I want to know how much the pizza costed
+          each of us, after tax.
+        </p>
+        <p>
+          <pre>
+            <code>
+// First calculate the total cost of the pizza including tax
+const calcTotalWithTax = pizzaCost => pizzaCost * 1.13 // Here in Toronto, tax is 13%
+
+// Then calculate the cost of pizza for two people
+const costForTwo = itemCost => Math.round(itemCost/2 * 100) / 100
+
+// implement pipe function
+// the pipe function accepts only two
+// operations
+const pipe = (op1, op2) => {
+  // return a function that bundles all
+  // operations into a single operation
+  return (arg) => {
+     // first we invoke op1 with the passed
+    // arg and save its output
+   const result1 = op1(arg);
+   // invoke op2 by calling it with
+   // saved output of the op1 and return the result of op2
+   return op2(result1);
+  }
+}
+
+//Let's try out the pipe function
+const splitTotalCost = pipe(calcTotalWithTax, costForTwo)
+console.log(`$5 pizza (plus tax), would cost ${splitTotalCost(5)} between two people`); // 2.83
+            </code>
+          </pre>
+        </p>
+        <p>
+          Lets walk through the code to get a better understanding. Lets start with our operations:
+          <ul>
+            <li>The first operation calcTotalWithTax takes a cost and returns the cost plus tax.</li>
+            <li>The second operation costForTwo takes total cost and returns the total cost divided by two.</li>
+          </ul>
+          We pass the operations in their respective order to our pipe function.
+          The pipe function returns a new function splitTotalCost that accepts the cost of pizza and return the split cost.
+        </p>
+        <p>
+          Refactoring the Pipe Function:
+        </p>
+        <p>
+          Here is the current pipe function, which requires a variable to hold op1 output and takes up three lines of code.
+        </p>
+        <p>
+          <pre>
+            <code>
+const pipe = (op1, op2) => {
+  return (arg) => {
+   const result1 = op1(arg);
+   return op2(result1);
+  }
+}
+            </code>
+          </pre>
+        </p>
+        <p>
+          We can refactor the current pipe function into the following statement,
+        </p>
+        <p>
+          <pre>
+            <code>
+const pipe = (op1, op2) => (arg) => op2(op1(arg));
+            </code>
+          </pre>
+        </p>
+        <p>
+          Now the pipe function is declared in a single line; as well as, reducing the need for an
+          extra variable to hold op1 output.
+        </p>
+        <p>
+          Accepting More Than Two Functions:
+        </p>
+        <p>
+          The current status of the pipe function accepts only two functions; however according to the
+          definition, a pipe function should be able to accept n number of functions. According to
+          the definition, the pipe function should be something like the following pseudocode
+        </p>
+        <p>
+          <pre>
+            <code>
+const pipe = (op1, op2, op3, ... , opN) => {
+  return (arg) => opN(op3(op2(op1(arg))));
+}
+            </code>
+          </pre>
+        </p>
+        <p>
+          Utilizing our current pipe function and rest parameter syntax, a new pipe function can be produced that accepts n number of functions.
+        </p>
+        <p>
+          <pre>
+            <code>
+// Utilize the previous pipe function that accepts only two functions
+const _pipe = (a, b) => (arg) => b(a(arg));
+
+// The rest parameters creates an array of operations
+const pipe = (...ops) => {
+
+  // Iterate over the array of operations
+  // By using reduce, merge all operations into a single bundle
+  let bundle = ops.reduce((prevOp, nextOp) => {
+    return _pipe(prevOp,nextOp);
+  });
+  return bundle;
+}
+
+            </code>
+          </pre>
+        </p>
+        <p>
+          Here is the refactored version of the function:
+        </p>
+        <p>
+          <pre>
+            <code>
+const _pipe = (a, b) => (arg) => b(a(arg));
+
+// Refactored
+const pipe = (...ops) => ops.reduce(_pipe)
+            </code>
+          </pre>
+        </p>
+        <p>
+          Let’s expand on the previous pizza example, by converting the split cost into US dollar for my American friend.
+        </p>
+        <p>
+          <pre>
+            <code>
+const _pipe = (a, b) => (arg) => b(a(arg));
+const pipe = (...ops) => ops.reduce(_pipe)
+
+const calcTotalWithTax = pizzaCost => pizzaCost * 1.13
+const costForTwo = itemCost => Math.round(itemCost/2 * 100) / 100
+const cadToUSD = (cad) => Math.round(cad * 0.753653*100)/100;
+const costPerPersonUsd = pipe(calcTotalWithTax, costForTwo, cadToUSD);
+console.log(`You have to pay $ ${costPerPersonUsd(5)} US.`); // You have to pay $2.13 in usd
+
+
+// Behind the scene:
+const costPerPersonUsd = (calcTotalWithTax, costForTwo, cadToUSD)
+1. _pipe(calcTotalWithTax, costForTwo) `would be` (args) => costForTwo(calcTotalWithTax(arg)) // We will call the bundled function pipe1
+2a.  _pipe((args) =>  costForTwo(calcTotalWithTax(arg), cadToUSD)` would be` (arg) => cadToUsd( costForTwo(calcTotalWithTax(arg))
+// or  _pipe(pipe1, cadToUSD) would become  (arg) => cadToUsd( costForTwo(calcTotalWithTax(arg))
+3. costPerPersonUsd `would be` (args) => cadToUsd( costForTwo(calcTotalWithTax(arg))
+            </code>
+          </pre>
+        </p>
+        <p>
+          Explanation of the code:
+          <ul>
+            <li>Before examining the code, we must have a good understanding of how reduce function works. If we don’t provide an accumulator to the reduce function initially, then the reduce function will pass the first and second element of the array into the callback, only for the first iteration. Which is what we desire.</li>
+            <li>The operations are then passed to _pipe function which returns a bundled function, that becomes the accumulator for the next iterations.</li>
+          </ul>
+        </p>
+        <p>
+          <pre>
+            <code>
+const _pipe = (a, b) => (arg) => b(a(arg));
+const pipe = (...ops) => ops.reduce(_pipe)
+
+const calcTotalWithTax = pizzaCost => pizzaCost * 1.13
+const costForTwo = itemCost => Math.round(itemCost/2 * 100) / 100
+const cadToUSD = (cad) => Math.round(cad * 0.753653*100)/100;
+const costPerPersonUsd = pipe(calcTotalWithTax, costForTwo, cadToUSD);
+console.log(`You have to pay $ ${costPerPersonUsd(5)} US.`); // You have to pay $2.13 in usd
+
+
+// Behind the scene:
+const costPerPersonUsd = (calcTotalWithTax, costForTwo, cadToUSD)
+1. _pipe(calcTotalWithTax, costForTwo) `would be` (args) => costForTwo(calcTotalWithTax(arg)) // We will call the bundled function pipe1
+2a.  _pipe((args) =>  costForTwo(calcTotalWithTax(arg), cadToUSD)` would be` (arg) => cadToUsd( costForTwo(calcTotalWithTax(arg))
+// or  _pipe(pipe1, cadToUSD) would become  (arg) => cadToUsd( costForTwo(calcTotalWithTax(arg))
+3. costPerPersonUsd `would be` (args) => cadToUsd( costForTwo(calcTotalWithTax(arg))
+            </code>
+          </pre>
+        </p>
+        <p>
+          Recently I was working on a project that involved retrieving a JSON containing an array of
+          objects. The objects represented school names and their addresses. And my objective was to
+          display the received schools as an un-ordered list containing the name and address.
+        </p>
+        <p>
+          Let see how the problem can be tackled using pipe function.
+        </p>
+        <p>
+          <pre>
+            <code>
+const schools = [
+  { name: "St. Marcellinus Secondary School", address: "730 Courtneypark Drive West" },
+  { name: "Sir William Mulock S.S.", address: "705 Columbus Way" },
+  { name: "George Harvey Collegiate Institute", address: "1700 Keele St" },
+  { name: "Dr. G.W. Williams S.S.", address: "39 Dunning Ave." },
+  { name: "Weston Collegiate Institute", address: "100 Pine St" }
+];
+const _pipe = (a, b) => (arg) => b(a(arg));
+const pipe = (...ops) => ops.reduce(_pipe);
+
+//1. Iterate over the array of schools
+//2. Make a li element containing the school name and address separated by '-'
+//3. Append the li to the ul with an id of 'school-list'
+
+const makeLi = (schoolObj) => {
+  const newLI = document.createElement('li');
+  newLI.appendChild(document.createTextNode(`${schoolObj.name} - ${schoolObj.address}`));
+  return newLI
+}
+const appendLiToSchoolList = (li) => {
+  let schoolList = document.querySelector('#school-list');
+  return schoolList.appendChild(li);
+}
+const generateLi = pipe(makeLi,appendLiToSchoolList);
+
+schools.forEach(school => generateLi(school));
+            </code>
+          </pre>
+        </p>
+      </section>
+
+      <aside id="sidebar">
+
+
+        <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        <h3>
+
+        </h3>
+      </aside>
+    </div>
+  </div>
+
+
+</body>
+</html>
