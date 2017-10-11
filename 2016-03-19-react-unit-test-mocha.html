@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+  <script src="javascripts/main.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+  <title>React Unit Test Using Mocha</title>
+</head>
+
+<body>
+  <header>
+    <div class="inner">
+      <h1><a href="http://theredfoxfire.github.io/">Hasan Setiawan</a></h1>
+      <h2>Write, write, write give your wings on code!</h2>
+      <a href="https://github.com/theredfoxfire" class="button"><small>Follow me on</small> GitHub</a>
+    </div>
+  </header>
+
+  <div id="content-wrapper">
+    <div class="inner clearfix">
+      <section id="main-content">
+        <h2>React Unit Test Using Mocha</h2>
+        <p>Heres the dependencies you should install for a solid test set up:</p>
+        <p>
+          <pre>
+            <code>
+npm i babel-core babel-preset-es2015 babel-preset-react babel-preset-stage-2
+npm i chai mocha enzyme sinon
+npm i react react-addons-test-utils react-dom
+n.b. react-addons-test-utils and react-dom are implicit dependencies of react.
+</code>
+</pre>
+</p>
+<p>
+Then you’ll need to pass babel-core/register to mocha, so in your test script:
+</p>
+<p>
+  <pre>
+    <code>
+"test": "mocha -w --compilers js:babel-core/register '[glob to match test files]'"
+// a glob might be something like: **/*.spec.js
+// this would match any file whose names ends with .spec.js in any directory
+You’ll need to declare your babel plugins, which you can do in your package.json or a .babelrc.
+
+// .babelrc
+{
+  "presets": ["es2015", "react", "stage-2"],
+  "ignore": "node_modules"
+}
+
+// package.json
+"babel": {
+  {
+    "presets": ["es2015", "react", "stage-2"],
+    "ignore": "node_modules"
+  }
+}
+</code>
+</pre>
+</p>
+<p>
+some components to test
+Lets add two simple components. One is a save button and the other rendered a list of names passed through props as an array. By no means a perfect component, the myComponent component will demonstrate how we can test state, rendering and click events/even handlers.
+</p>
+<p>
+  <pre>
+    <code>
+saveButton.js
+import React from 'react';
+
+export default (props) => {
+  return (<script>var str = `<button>save</button>`;
+  document.write(htmlEntities(str));</script>);
+}
+myComponent.js
+import React from 'react';
+import Save from './saveButton';
+
+export default React.createClass({
+  getInitialState() {
+    return {
+      title: 'list'
+    }
+  },
+  selected(evt) {
+    this.setState({
+      title: `you selected ${evt.target.innerText}`
+    })
+  },
+  renderListItem(name) {
+    return (
+    <script>var str = `
+      <li onClick={this.selected}>{name}</li>`;
+      document.write(htmlEntities(str));</script>
+    );
+  },
+  renderList() {
+    if (this.props.names) {
+      return (
+      <script>var str = `
+        <ul>
+          { this.props.names.map(this.renderListItem) }
+        </ul>
+        document.write(htmlEntities(str));</script>
+      );
+    }
+    return null;
+  },
+  render() {
+    return (
+    <script>var str = `<Save onClick={this.props.onSave} />
+      <div>
+        <h3>{this.state.title}</h3>
+        { this.renderList() }
+      </div>`;
+      document.write(htmlEntities(str));</script>
+    );
+  }
+});
+</code>
+</pre>
+</p>
+<p>
+myComponent.spec.js
+Heres out test file
+</p>
+<p>
+  <pre>
+    <code>
+import React from 'react';
+import { shallow, mount } from 'enzyme';
+import { expect } from 'chai';
+import sinon from 'sinon';
+
+import MyComponent from './myComponent';
+import SaveButton from './saveButton';
+
+
+describe('<script>var str = `<MyComponent />`; document.write(htmlEntities(str));</script>', () => {
+  describe('when rendered', () => {
+   let component, sandbox, eventHandler;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      eventHandler = sandbox.stub();
+      component = shallow(<script>var str = `<MyComponent onSave={eventHandler} />`; document.write(htmlEntities(str));</script>);
+    });
+
+    it('should have a <script>var str = `<div>`; document.write(htmlEntities(str));</script> as it\'s root elment', () => {
+      expect(component.is('div')).to.equal(true);
+    });
+
+    it('should have a save button', () => {
+      expect(component.containsMatchingElement(SomeButton)).to.equal(true);
+    });
+
+    describe('when the save button is clicked', () => {
+      it('should call any callback functionality', () => {
+        sinon.assert.notCalled(eventHandler);
+        component.find(SomeButton).simulate('click');
+        sinon.assert.calledOnce(eventHandler);
+      });
+    });
+});
+
+describe('when given a list of names', () => {
+    let component, items, title;
+    let names = ['Andrew', 'Bob', 'Steve', 'Colin'];
+
+    beforeEach(() => {
+      component = shallow(<script>var str = `<MyComponent names={names} />`; document.write(htmlEntities(str));</script>);
+      items = component.find('li');
+      title = component.find('h3');
+    });
+
+    it('should show a unordered list containing those names', () => {
+      expect(items).to.have.length(names.length);
+
+      items.forEach((item, index) => {
+        expect(item.text()).to.equal(names[index]);
+      });
+    });
+
+    describe('the lists title', () => {
+      it('should initially say \'list\'', () => {
+        expect(title.text()).to.equal('list');
+      });
+
+      describe('when a list item has been clicked', () => {
+        let item;
+
+        beforeEach(() => {
+          item = component.find('li').first();
+          item.simulate('click', {target: {innerText: item.text()}});
+          title = component.find('h3');
+        });
+
+        it('should update the title with the item clicked', () => {
+          expect(title.text()).to.equal('you selected Andrew');
+        });
+      });
+    });
+  });
+});
+</code>
+</pre>
+</p>
+<p>
+To test our code we run the test script:
+<code>npm test</code>
+If everything is working correctly you’ll see 6 passing tests and a warning about adding keys to iterated output (i.e. when we map over a function that returns a component we should also add a unique key).
+</p>
+      </section>
+
+      <aside id="sidebar">
+
+
+        <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        <h3>
+
+        </h3>
+      </aside>
+    </div>
+  </div>
+
+
+</body>
+</html>
