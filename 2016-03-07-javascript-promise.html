@@ -48,7 +48,13 @@ function thirdMethod() {
 const howPromiseWork = new Promise((resolve, reject) => {
 	resolve(firstMethod());
 });
-howPromiseWork.then(secondMethod()).then(thirdMethod());
+
+howPromiseWork.then(secondMethod())
+.then(thirdMethod())
+.catch(function(error) {
+  console.log(error)
+  throw(error);
+});
 
 // will print log
 VM541:2 shoud be called at the first time
