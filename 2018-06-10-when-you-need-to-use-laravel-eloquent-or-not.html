@@ -55,7 +55,7 @@ public static function getBreakdown($date)
       where order_type = '4' and left(order_datetime, 10) BETWEEN :previousSix and :dateParam
       ", ['previousSix' => $previousSix,
       'dateParam' => $date,
-    ]);
+    ])[0];
 
     $takeAway = DB::select("
       select DISTINCT patron_type, count(total_amount) as total_patron from la_order_summary
@@ -63,7 +63,7 @@ public static function getBreakdown($date)
       ", [
       'previousSix' => $previousSix,
       'dateParam' => $date,
-    ]);
+    ])[0];
 
     return [
       'dinein' => $dinein->total_patron,
